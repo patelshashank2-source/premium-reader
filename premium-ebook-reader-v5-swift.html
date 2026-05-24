@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Premium Ebook Reader V3 Polished</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=EB+Garamond:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Cinzel:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --workspace-bg: #f6f5f2;
+      --workspace-panel: #ffffff;
+      --workspace-panel-2: #f0efeb;
+      --workspace-border: rgba(18, 22, 28, 0.08);
+      --workspace-text: #111418;
+      --workspace-muted: #6b737d;
+      --workspace-shadow: 0 18px 34px rgba(17, 21, 27, 0.08);
+      --page-width: 430px;
+      --page-height: 640px;
+      --font-size: 20px;
+      --line-height: 1.68;
+      --paragraph-spacing: 0.95em;
+      --header-space: 44px;
+      --footer-space: 54px;
+      --side-margin: 36px;
+      --gutter-width: 28px;
+      --animation-speed: 780ms;
+      --font-body: 'EB Garamond', Georgia, serif;
+      --font-head: 'Cormorant Garamond', Georgia, serif;
+      --font-ui: 'Inter', system-ui, sans-serif;
+      --font-decorative: 'Cinzel', serif;
+      --page-top: #efe2bf;
+      --page-bottom: #dbc79a;
+      --page-edge: #bda37a;
+      --page-text: #2b1f13;
+      --page-muted: #6e5640;
+      --page-rule: rgba(61, 38, 15, 0.16);
+      --page-shadow: 0 14px 28px rgba(12, 8, 4, 0.18), 0 2px 8px rgba(22, 12, 4, 0.10);
+      --page-inset: inset 0 1px 0 rgba(255,244,220,0.34), inset 0 -1px 0 rgba(95, 69, 31, 0.18);
+      --grain-opacity: .08;
+      --accent-ink: #8a6540;
+      --stage-bg: #000000;
+      --stage-fg: rgba(255,255,255,0.86);
+      --stage-ui: rgba(255,255,255,0.08);
+      --stage-border: rgba(255,255,255,0.10);
+    }
+    [data-page-theme="paper-white"] { --page-top:#ffffff;--page-bottom:#f3f6f8;--page-edge:#dde4ea;--page-text:#1c242d;--page-muted:#6b7785;--page-rule:rgba(31, 41, 51, 0.14);--page-shadow:0 12px 24px rgba(16, 22, 29, 0.12),0 2px 6px rgba(16, 22, 29, 0.05);--page-inset:inset 0 1px 0 rgba(255,255,255,.9), inset 0 -1px 0 rgba(130,145,160,.14);--grain-opacity:.03;--accent-ink:#5e7da1; }
+    [data-page-theme="sepia"] { --page-top:#f4ead4;--page-bottom:#eadcbc;--page-edge:#d8c39b;--page-text:#352418;--page-muted:#7a6147;--page-rule:rgba(67, 44, 19, 0.16);--page-shadow:0 14px 28px rgba(37, 24, 10, 0.16),0 2px 7px rgba(18, 11, 4, 0.06);--page-inset:inset 0 1px 0 rgba(255,250,238,.62), inset 0 -1px 0 rgba(109,82,38,.16);--grain-opacity:.05;--accent-ink:#8d6840; }
+    [data-page-theme="old-book"] { --page-top:#efe2bf;--page-bottom:#dbc79a;--page-edge:#bda37a;--page-text:#2b1f13;--page-muted:#6e5640;--page-rule:rgba(61,38,15,.16);--page-shadow:0 28px 54px rgba(12,8,4,.30),0 3px 14px rgba(22,12,4,.18);--page-inset:inset 0 1px 0 rgba(255,244,220,.34), inset 0 -1px 0 rgba(95,69,31,.18);--grain-opacity:.08;--accent-ink:#8a6540; }
+    [data-page-theme="dark-reader"] { --page-top:#1c2024;--page-bottom:#16191d;--page-edge:#0f1215;--page-text:#e2d9c6;--page-muted:#a79d8f;--page-rule:rgba(255,255,255,.08);--page-shadow:0 14px 28px rgba(0,0,0,.22),0 2px 7px rgba(0,0,0,.12);--page-inset:inset 0 1px 0 rgba(255,255,255,.03), inset 0 -1px 0 rgba(0,0,0,.24);--grain-opacity:.04;--accent-ink:#cca977; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html, body { width:100%; height:100%; overflow:hidden; background:var(--workspace-bg); color:var(--workspace-text); font-family:var(--font-ui); }
+    body.fs-reading { background:var(--stage-bg); }
+    button, input, select, textarea { font:inherit; }
+    .app { width:100%; height:100%; display:grid; grid-template-columns:300px 1fr 300px; }
+    .app.left-collapsed { grid-template-columns:0 1fr 300px; }
+    .app.right-collapsed { grid-template-columns:300px 1fr 0; }
+    .app.left-collapsed.right-collapsed { grid-template-columns:0 1fr 0; }
+    .panel { min-width:0; overflow:hidden; background:var(--workspace-panel); border-right:1px solid var(--workspace-border); box-shadow:var(--workspace-shadow); transition:opacity .28s ease, transform .32s ease, width .32s ease, visibility .32s ease; z-index:4; }
+    .panel.right { border-right:none; border-left:1px solid var(--workspace-border); }
+    .app.left-collapsed .panel.left, .app.right-collapsed .panel.right { width:0; opacity:0; visibility:hidden; pointer-events:none; }
+    .panel-scroll { height:100%; overflow:auto; padding:22px; }
+    .brand { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
+    .brand-mark { width:46px; height:46px; border-radius:50%; display:grid; place-items:center; background:#111; color:#fff; font-family:var(--font-decorative); letter-spacing:.12em; }
+    .brand h1 { font-family:var(--font-head); font-size:1.85rem; line-height:.95; }
+    .muted, .hint { color:var(--workspace-muted); }
+    .section { margin-bottom:24px; }
+    .section-title { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:.78rem; text-transform:uppercase; letter-spacing:.18em; color:var(--workspace-muted); }
+    .card { background:var(--workspace-panel); border:1px solid var(--workspace-border); border-radius:18px; box-shadow:var(--workspace-shadow); }
+    .stack { display:grid; gap:12px; }
+    .input-shell { padding:12px 14px; border:1px solid var(--workspace-border); border-radius:14px; background:var(--workspace-panel-2); }
+    .text-input, textarea { width:100%; border:none; outline:none; background:transparent; color:var(--workspace-text); }
+    textarea { min-height:220px; padding:14px; resize:vertical; line-height:1.55; }
+    .row, .topbar-group, .toolbar-row { display:flex; gap:10px; flex-wrap:wrap; }
+    .btn, .icon-btn, select { appearance:none; border:none; outline:none; min-height:42px; border-radius:999px; padding:0 16px; background:#fff; border:1px solid var(--workspace-border); color:var(--workspace-text); display:inline-flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; box-shadow:0 8px 18px rgba(17,21,27,.05); transition:transform .16s ease, background .16s ease; }
+    .btn:hover, .icon-btn:hover, select:hover { transform:translateY(-1px); background:#fafafa; }
+    .btn.primary { background:#111; color:#fff; }
+    .icon-btn { width:42px; padding:0; border-radius:50%; }
+    .chip-row { display:flex; gap:8px; flex-wrap:wrap; }
+    .chip { display:inline-flex; align-items:center; padding:8px 12px; border-radius:999px; background:var(--workspace-panel-2); border:1px solid var(--workspace-border); color:var(--workspace-muted); font-size:.84rem; }
+    .control-grid { display:grid; gap:14px; padding:16px; }
+    .control-item { display:grid; gap:8px; }
+    .control-item label { display:flex; justify-content:space-between; gap:12px; font-size:.92rem; }
+    .value { font-size:.82rem; color:var(--workspace-muted); font-variant-numeric:tabular-nums; }
+    input[type="range"] { width:100%; appearance:none; height:6px; border-radius:999px; background:linear-gradient(90deg,#111, #8f8f8f); }
+    input[type="range"]::-webkit-slider-thumb { appearance:none; width:18px; height:18px; border-radius:50%; background:#fff; border:2px solid #111; box-shadow:0 4px 10px rgba(0,0,0,.14); }
+    .toc-list { display:grid; gap:6px; }
+    .toc-item { width:100%; text-align:left; padding:10px 12px; border-radius:14px; background:transparent; border:1px solid transparent; cursor:pointer; transition:background .16s ease, border-color .16s ease, transform .16s ease; }
+    .toc-item:hover { background:var(--workspace-panel-2); border-color:var(--workspace-border); transform:translateX(1px); }
+    .toc-item strong { display:block; color:var(--workspace-text); }
+    .toc-item span { font-size:.84rem; color:var(--workspace-muted); }
+
+    .reader-shell { position:relative; min-width:0; height:100%; display:grid; grid-template-rows:auto 1fr; overflow:hidden; background:linear-gradient(180deg,#f6f5f1,#eceae5); }
+    .reader-shell:not(.fullscreen) {
+      background:
+        radial-gradient(
+          circle at center,
+          #f8f6f2 0%,
+          #efede8 58%,
+          #e7e4de 100%
+        );
+    }
+    body.fs-reading .reader-shell { background:#000; }
+    .topbar {
+      position:relative;
+      z-index:8;
+
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+
+      padding:22px 28px 8px;
+
+      transition:
+        opacity .28s ease,
+        transform .28s ease;
+    }
+    .reader-shell.fullscreen .topbar { position:absolute; inset:0 0 auto 0; opacity:0; transform:translateY(-120%); pointer-events:none; }
+    .reader-shell.fullscreen.reveal-ui .topbar { opacity:1; transform:translateY(0); pointer-events:auto; }
+    .reading-stage {
+      position:relative;
+      min-height:0;
+      display:grid;
+      place-items:center;
+      padding:40px 32px 48px;
+      overflow:hidden;
+    }
+
+    .reader-shell.fullscreen .reading-stage {
+      width:100%;
+      height:100vh;
+      padding:0;
+      place-items:center;
+    }
+    .center-stage {
+      position:relative;
+      width:100%;
+      height:100%;
+      display:grid;
+      place-items:center;
+      align-content:center;
+    }
+    .book-viewport {
+      position:relative;
+      width:min(
+        calc(var(--page-width) * 2 + var(--gutter-width) + 5rem),
+        calc(100vw - 8rem)
+      );
+
+      height:min(
+        calc(var(--page-height) + 4rem),
+        calc(100vh - 10rem)
+      );
+
+      display:grid;
+      place-items:center;
+
+      perspective:2400px;
+
+      overflow:hidden;
+    }
+    
+    .reader-shell:not(.fullscreen) .book-viewport {
+      transform:translateY(-8px);
+    }
+
+    .reader-shell.fullscreen .book-viewport {
+      transform:translateY(0);
+    }
+
+.reader-shell.fullscreen .book-viewport {
+      width:min(
+        calc(var(--page-width) * 2 + var(--gutter-width) + 6rem),
+        calc(100vw - 2rem)
+      );
+
+      height:min(
+        calc(var(--page-height) + 3rem),
+        calc(100vh - 2rem)
+      );
+
+      display:grid;
+      place-items:center;
+    }
+    .book {
+      position:relative;
+
+      width:calc(var(--page-width) * 2 + var(--gutter-width));
+      height:calc(var(--page-height) + 24px);
+
+      display:flex;
+      justify-content:center;
+      align-items:stretch;
+
+      padding:12px 0;
+
+      isolation:isolate;
+      overflow:hidden;
+
+      filter:drop-shadow(0 18px 28px rgba(0,0,0,.18));
+    }
+    .book::before {
+      content:"";
+
+      position:absolute;
+
+      left:50%;
+      top:18px;
+      bottom:18px;
+
+      width:72px;
+
+      transform:translateX(-50%);
+
+      background:
+        linear-gradient(
+          90deg,
+          transparent,
+          rgba(0,0,0,.18) 22%,
+          rgba(255,255,255,.04) 50%,
+          rgba(0,0,0,.22) 78%,
+          transparent
+        );
+
+      z-index:3;
+
+      opacity:.55;
+
+      pointer-events:none;
+    }
+    .page { position:relative; width:var(--page-width); height:var(--page-height); background:linear-gradient(180deg,var(--page-top),var(--page-bottom)); box-shadow:var(--page-shadow), var(--page-inset); }
+    .page-left { border-radius:14px 4px 4px 14px; }
+    .page-right { border-radius:4px 14px 14px 4px; }
+    .page::before { content:""; position:absolute; inset:0; border-radius:inherit; background:linear-gradient(90deg, rgba(0,0,0,.08), transparent 12%, transparent 88%, rgba(0,0,0,.06)), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.2'/%3E%3C/svg%3E"); background-size:auto,260px 260px; mix-blend-mode:multiply; opacity:var(--grain-opacity); pointer-events:none; }
+    .page-header, .page-footer { position:absolute; left:var(--side-margin); right:var(--side-margin); display:flex; justify-content:space-between; align-items:center; font-size:.76rem; text-transform:uppercase; letter-spacing:.16em; font-family:var(--font-ui); color:var(--page-muted); pointer-events:none; }
+    .page-header { top:calc(var(--header-space) * .24); }
+    .page-footer { bottom:calc(var(--footer-space) * .22); }
+    .page-number { font-variant-numeric:tabular-nums; }
+    .content-frame { position:absolute; top:var(--header-space); bottom:var(--footer-space); overflow:hidden; }
+    .page-left .content-frame { left:var(--side-margin); right:calc(var(--gutter-width) + 10px); }
+    .page-right .content-frame { left:calc(var(--gutter-width) + 10px); right:var(--side-margin); }
+    .page-inner { width:100%; height:100%; overflow:hidden; color:var(--page-text); }
+    .page-inner h1, .page-inner h2, .page-inner h3, .page-inner h4 { font-family:var(--font-head); font-weight:600; line-height:1.1; margin:0; color:var(--page-text); break-inside:avoid; text-wrap:balance; }
+    .page-inner h1 { font-size:calc(var(--font-size) * 1.95); margin-bottom:.42em; }
+    .page-inner h2 { font-size:calc(var(--font-size) * 1.48); margin-bottom:.44em; margin-top:.2em; }
+    .page-inner h3 { font-size:calc(var(--font-size) * 1.18); margin-bottom:.40em; margin-top:.18em; }
+    .page-inner h4 { font-size:calc(var(--font-size) * 1.02); margin-bottom:.35em; text-transform:uppercase; letter-spacing:.08em; }
+    .page-inner p, .page-inner li, .page-inner blockquote { font-family:var(--font-body); font-size:var(--font-size); line-height:var(--line-height); margin:0 0 var(--paragraph-spacing) 0; color:var(--page-text); orphans:3; widows:3; }
+    .page-inner strong { font-weight:700; }
+    .page-inner em { font-style:italic; }
+    .page-inner hr { border:none; border-top:1px solid var(--page-rule); margin:calc(var(--paragraph-spacing) * 1.1) auto; width:38%; }
+    .page-inner blockquote { border-left:2px solid color-mix(in srgb,var(--accent-ink) 55%, var(--page-rule)); padding-left:1em; margin-left:.1em; font-style:italic; }
+    .page-inner ul, .page-inner ol { margin:0 0 var(--paragraph-spacing) 1.35em; }
+    .page-inner li { margin-bottom:.45em; }
+    .dropcap:first-letter { float:left; font-size:3.2em; line-height:.82; padding-right:.14em; font-family:var(--font-head); color:var(--accent-ink); }
+
+    .measurement-layer { position:absolute; left:-99999px; top:0; visibility:hidden; pointer-events:none; contain:layout style paint; }
+    .measure-page { position:relative; width:var(--page-width); height:var(--page-height); }
+    .measure-content { position:absolute; top:var(--header-space); bottom:var(--footer-space); left:var(--side-margin); right:calc(var(--gutter-width) + 10px); }
+    .spread-animating {
+      animation-duration: 170ms;
+      animation-timing-function:cubic-bezier(.22,.8,.36,1);
+      animation-fill-mode:both;
+    }
+
+    .spread-forward-out {
+      animation-name:spreadForwardOut;
+    }
+
+    .spread-forward-in {
+      animation-name:spreadForwardIn;
+    }
+
+    .spread-backward-out {
+      animation-name:spreadBackwardOut;
+    }
+
+    .spread-backward-in {
+      animation-name:spreadBackwardIn;
+    }
+
+    @keyframes spreadForwardOut {
+      from {
+        transform:translateX(0);
+        opacity:1;
+      }
+      to {
+        transform:translateX(-10px);
+        opacity:0;
+      }
+    }
+
+    @keyframes spreadForwardIn {
+      from {
+        transform:translateX(10px);
+        opacity:0;
+      }
+      to {
+        transform:translateX(0);
+        opacity:1;
+      }
+    }
+
+    @keyframes spreadBackwardOut {
+      from {
+        transform:translateX(0);
+        opacity:1;
+      }
+      to {
+        transform:translateX(10px);
+        opacity:0;
+      }
+    }
+
+    @keyframes spreadBackwardIn {
+      from {
+        transform:translateX(-10px);
+        opacity:0;
+      }
+      to {
+        transform:translateX(0);
+        opacity:1;
+      }
+    }
+    
+
+    @media (max-width: 980px) {
+      .app { grid-template-columns:1fr; }
+      .panel { position:absolute; inset:0 auto 0 0; width:min(300px, 88vw); }
+      .panel.right { inset:0 0 0 auto; }
+      .app.left-collapsed .panel.left { transform:translateX(-110%); }
+      .app.right-collapsed .panel.right { transform:translateX(110%); }
+      .book { width:var(--page-width); }
+      .book::before, .page-left, .turn-sheet.backward { display:none; }
+      .page-right { border-radius:14px; }
+      .page-right .content-frame { left:var(--side-margin); right:var(--side-margin); }
+      .turn-layer { width:var(--page-width); left:calc((100% - var(--page-width))/2); }
+      .turn-sheet.forward { left:0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+    }
+  </style>
+</head>
+<body data-page-theme="old-book">
+  <div class="app" id="app">
+    <aside class="panel left" id="leftPanel">
+      <div class="panel-scroll">
+        <div class="brand"><div class="brand-mark">L</div><div><h1>Libris<br>Polished</h1><p class="muted">Quiet studio workspace</p></div></div>
+
+        <section class="section">
+          <div class="section-title"><span>Book</span><button class="icon-btn" id="hideLeftBtn">×</button></div>
+          <div class="card" style="padding:14px; display:grid; gap:10px;">
+            <div class="input-shell"><input class="text-input" id="titleInput" value="The Library at Candlefall" placeholder="Book title"></div>
+            <div class="input-shell"><input class="text-input" id="authorInput" value="Anonymous" placeholder="Author"></div>
+            <div class="toolbar-row">
+              <button class="btn primary" id="openBookBtn">Open Book</button>
+              <button class="btn" id="sampleBtn">Sample</button>
+              <button class="btn" id="clearBtn">Clear</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-title"><span>Paste text</span></div>
+          <div class="card"><textarea id="bookInput" spellcheck="false" placeholder="# Title\n\nPaste markdown or plain text here."></textarea></div>
+        </section>
+
+        <section class="section">
+          <div class="section-title"><span>Stats</span></div>
+          <div class="chip-row">
+            <span class="chip" id="wordCountChip">0 words</span>
+            <span class="chip" id="chapterCountChip">0 chapters</span>
+            <span class="chip" id="readingTimeChip">0 min read</span>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <main class="reader-shell" id="readerShell">
+      <div class="reveal-zone" id="revealZone"></div>
+      <header class="topbar" id="topbar">
+        <div class="topbar-group">
+          <button class="icon-btn" id="showLeftBtn">☰</button>
+          <button class="icon-btn" id="showRightBtn">⚙</button>
+          <button class="icon-btn" id="prevBtn">←</button>
+          <button class="icon-btn" id="nextBtn">→</button>
+          <button class="btn" id="fullscreenBtn">Fullscreen</button>
+        </div>
+        <div class="topbar-group">
+          <button class="btn" id="bookmarkBtn">Bookmark</button>
+          <button class="btn" id="goToStartBtn">Start</button>
+          <button class="btn" id="repaginateBtn">Repaginate</button>
+        </div>
+      </header>
+
+      <section class="reading-stage">
+        <div class="center-stage">
+          <div class="book-viewport" id="bookViewport">
+            <div class="empty-state" id="emptyState">
+              <h2>Composed for reading.</h2>
+              <p>A simpler, centered, calmer reading experience. Paste text in the studio, then step into fullscreen for a black room and a centered book.</p>
+            </div>
+
+            <div class="book hide" id="book">
+              <article class="page page-left">
+                <div class="page-header"><span id="leftHeaderTitle">Title</span><span id="leftHeaderChapter">Chapter</span></div>
+                <div class="content-frame"><div class="page-inner" id="leftPageInner"></div></div>
+                <div class="page-footer"><span id="leftFooterProgress">0%</span><span class="page-number" id="leftPageNumber">1</span></div>
+              </article>
+              <article class="page page-right">
+                <div class="page-header"><span id="rightHeaderTitle">Title</span><span id="rightHeaderChapter">Chapter</span></div>
+                <div class="content-frame"><div class="page-inner" id="rightPageInner"></div></div>
+                <div class="page-footer"><span id="rightFooterProgress">0%</span><span class="page-number" id="rightPageNumber">2</span></div>
+              </article>
+              
+            </div>
+
+            <div class="spread-nav">
+              <button class="nav-hit" id="edgePrevBtn">←</button>
+              <button class="nav-hit" id="edgeNextBtn">→</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="status-pill" id="statusPill">
+        <span id="statusTitle">No book loaded</span>
+        <span>•</span>
+        <span id="statusSpread">Spread 0 / 0</span>
+        <span>•</span>
+        <span id="statusPages">Pages 0 / 0</span>
+        <span>•</span>
+        <span id="statusChapter">No chapter</span>
+      </div>
+    </main>
+
+    <aside class="panel right" id="rightPanel">
+      <div class="panel-scroll">
+        <section class="section">
+          <div class="section-title"><span>Navigation</span><button class="icon-btn" id="hideRightBtn">×</button></div>
+          <div class="card control-grid">
+            <div class="input-shell"><input class="text-input" id="searchInput" placeholder="Search in book"></div>
+            <div class="toolbar-row"><button class="btn" id="searchBtn">Find</button><button class="btn" id="clearSearchBtn">Clear</button></div>
+            <div class="hint" id="searchResultText">No search active.</div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-title"><span>Table of contents</span><span class="muted" id="tocMeta">0 entries</span></div>
+          <div class="card control-grid"><div class="toc-list" id="tocList"></div></div>
+        </section>
+
+        <section class="section">
+          <div class="section-title"><span>Appearance</span></div>
+          <div class="card control-grid">
+            <div class="control-item"><label for="themeSelect">Page Theme <span class="value" id="themeValue">Old Book</span></label><select id="themeSelect"><option value="old-book">Old Book</option><option value="sepia">Sepia</option><option value="paper-white">Paper White</option><option value="dark-reader">Dark Reader</option></select></div>
+            <div class="control-item"><label for="fontSelect">Font Family <span class="value" id="fontValue">EB Garamond</span></label><select id="fontSelect"><option value="garamond">EB Garamond</option><option value="cormorant">Cormorant</option><option value="classic">Georgia</option><option value="modern">Inter</option></select></div>
+            <div class="control-item"><label for="speedSelect">Turn Speed <span class="value" id="speedValue">Balanced</span></label><select id="speedSelect"><option value="620">Swift</option><option value="780" selected>Balanced</option><option value="980">Slow</option></select></div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-title"><span>Typography</span></div>
+          <div class="card control-grid">
+            <div class="control-item"><label for="fontSizeRange">Font Size <span class="value" id="fontSizeValue"></span></label><input id="fontSizeRange" type="range" min="15" max="30" step="1" value="20"></div>
+            <div class="control-item"><label for="lineHeightRange">Line Spacing <span class="value" id="lineHeightValue"></span></label><input id="lineHeightRange" type="range" min="1.3" max="2.2" step="0.02" value="1.68"></div>
+            <div class="control-item"><label for="paragraphSpacingRange">Paragraph Space <span class="value" id="paragraphSpacingValue"></span></label><input id="paragraphSpacingRange" type="range" min="0.4" max="1.8" step="0.05" value="0.95"></div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-title"><span>Page geometry</span></div>
+          <div class="card control-grid">
+            <div class="control-item"><label for="headerSpaceRange">Header Space <span class="value" id="headerSpaceValue"></span></label><input id="headerSpaceRange" type="range" min="18" max="92" step="1" value="44"></div>
+            <div class="control-item"><label for="footerSpaceRange">Footer Space <span class="value" id="footerSpaceValue"></span></label><input id="footerSpaceRange" type="range" min="18" max="110" step="1" value="54"></div>
+            <div class="control-item"><label for="sideMarginRange">Side Margins <span class="value" id="sideMarginValue"></span></label><input id="sideMarginRange" type="range" min="18" max="68" step="1" value="36"></div>
+            <div class="control-item"><label for="gutterWidthRange">Gutter Width <span class="value" id="gutterWidthValue"></span></label><input id="gutterWidthRange" type="range" min="8" max="46" step="1" value="28"></div>
+            <div class="control-item"><label for="pageWidthRange">Page Width <span class="value" id="pageWidthValue"></span></label><input id="pageWidthRange" type="range" min="320" max="560" step="2" value="430"></div>
+          </div>
+        </section>
+      </div>
+    </aside>
+  </div>
+
+  <div class="measurement-layer">
+    <div class="measure-page"><div class="measure-content"><div class="page-inner" id="measureInner"></div></div></div>
+  </div>
+
+  <script>
+    const sampleMarkdown = `# The Library at Candlefall
+
+## Prologue
+
+The room had learned how to keep time without clocks. Dust lifted and settled in the long amber beams above the shelves, while the leather backs of forgotten volumes drank the last warmth of evening.
+
+Every reader who entered the library believed, for a little while, that silence was empty. Then the pages began to breathe.
+
+---
+
+## I. Arrival
+
+When Mara first crossed the threshold, she did not notice the painted ceiling or the brass globes sleeping in their niches. She noticed the scent first: cedar, vellum, rain carried in on old wool.
+
+**A book should not merely be opened; it should be entered.** That was the sentence written in a careful hand upon the card placed at the front desk.
+
+She smiled, though no one had spoken.
+
+### The Keeper
+
+The keeper of the library appeared so quietly that Mara mistook him at first for another piece of furniture among the catalog cabinets and ladders.
+
+"You may choose any chair," he said, "but the book will choose its own pace."
+
+## II. The Reading Room
+
+There were two pages open before her, like wings held in perfect balance. The gutter sank gently between them with the gravity of a sewn spine.
+
+### Marginalia
+
+- Headings that need air above and below.
+- Paragraphs that should not be torn in half unless necessary.
+- Italics that remain delicate.
+- Bold text that keeps its weight.
+
+## III. Turning
+
+A page should never snap away like glass. It should yield. The corner should gather light, the sheet should arc, and a brief shadow should pass over the words that are leaving.
+
+## IV. Night Chamber
+
+Fullscreen should become a black room. Nothing should remain but the book itself, waiting in silence.`;
+
+    const $ = s => document.querySelector(s);
+    const state = { rawText:'', blocks:[], pages:[], toc:[], bookmarks:[], currentSpread:0, currentAnchorId:null, bookTitle:'The Library at Candlefall', author:'Anonymous', isAnimating:false };
+    const els = {
+      body: document.body, app: $('#app'), readerShell: $('#readerShell'), titleInput: $('#titleInput'), authorInput: $('#authorInput'), bookInput: $('#bookInput'),
+      openBookBtn: $('#openBookBtn'), sampleBtn: $('#sampleBtn'), clearBtn: $('#clearBtn'), hideLeftBtn: $('#hideLeftBtn'), hideRightBtn: $('#hideRightBtn'), showLeftBtn: $('#showLeftBtn'), showRightBtn: $('#showRightBtn'),
+      wordCountChip: $('#wordCountChip'), chapterCountChip: $('#chapterCountChip'), readingTimeChip: $('#readingTimeChip'),
+      emptyState: $('#emptyState'), book: $('#book'), leftPageInner: $('#leftPageInner'), rightPageInner: $('#rightPageInner'), leftPageNumber: $('#leftPageNumber'), rightPageNumber: $('#rightPageNumber'), leftFooterProgress: $('#leftFooterProgress'), rightFooterProgress: $('#rightFooterProgress'), leftHeaderTitle: $('#leftHeaderTitle'), rightHeaderTitle: $('#rightHeaderTitle'), leftHeaderChapter: $('#leftHeaderChapter'), rightHeaderChapter: $('#rightHeaderChapter'),
+      prevBtn: $('#prevBtn'), nextBtn: $('#nextBtn'), edgePrevBtn: $('#edgePrevBtn'), edgeNextBtn: $('#edgeNextBtn'), fullscreenBtn: $('#fullscreenBtn'), repaginateBtn: $('#repaginateBtn'), bookmarkBtn: $('#bookmarkBtn'), goToStartBtn: $('#goToStartBtn'),
+      statusTitle: $('#statusTitle'), statusSpread: $('#statusSpread'), statusPages: $('#statusPages'), statusChapter: $('#statusChapter'),
+      tocList: $('#tocList'), tocMeta: $('#tocMeta'), searchInput: $('#searchInput'), searchBtn: $('#searchBtn'), clearSearchBtn: $('#clearSearchBtn'), searchResultText: $('#searchResultText'),
+      themeSelect: $('#themeSelect'), fontSelect: $('#fontSelect'), speedSelect: $('#speedSelect'), themeValue: $('#themeValue'), fontValue: $('#fontValue'), speedValue: $('#speedValue'), revealZone: $('#revealZone'), measureInner: $('#measureInner')
+    };
+    const ranges = [['fontSizeRange','fontSizeValue','px','--font-size'],['lineHeightRange','lineHeightValue','','--line-height'],['paragraphSpacingRange','paragraphSpacingValue','em','--paragraph-spacing'],['headerSpaceRange','headerSpaceValue','px','--header-space'],['footerSpaceRange','footerSpaceValue','px','--footer-space'],['sideMarginRange','sideMarginValue','px','--side-margin'],['gutterWidthRange','gutterWidthValue','px','--gutter-width'],['pageWidthRange','pageWidthValue','px','--page-width']].map(([a,b,c,d])=>({input:$('#'+a),value:$('#'+b),unit:c,cssVar:d}));
+
+    function escapeHtml(text){ return text.replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+    function inlineMarkdown(text){ return escapeHtml(text).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/__(.+?)__/g,'<strong>$1</strong>').replace(/(^|[^*])\*(?!\s)(.+?)(?!\s)\*(?!\*)/g,'$1<em>$2</em>').replace(/(^|[^_])_(?!\s)(.+?)(?!\s)_(?!_)/g,'$1<em>$2</em>'); }
+    function slugify(s){ return (s||'section').toLowerCase().replace(/<[^>]+>/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'section'; }
+
+    function parseSource(text){
+      state.toc = [];
+      const lines = text.replace(/\r\n?/g,'\n').split('\n'); const blocks=[]; let para=[]; let list=null; let title=''; let hc=0;
+      const flushPara=()=>{ if(!para.length) return; const t=para.join(' ').trim(); if(t){ blocks.push({type:'p',html:inlineMarkdown(t),raw:t,dropcap:!blocks.some(b=>b.type==='p'),anchorId:'p-'+blocks.length}); if(!title && t.length<80) title=t; } para=[]; };
+      const flushList=()=>{ if(list){ list.anchorId='l-'+blocks.length; blocks.push(list); list=null; } };
+      for(const raw of lines){ const line=raw.trim(); if(!line){ flushPara(); flushList(); continue; }
+        if(/^---+$/.test(line)){ flushPara(); flushList(); blocks.push({type:'hr',anchorId:'hr-'+blocks.length}); continue; }
+        const hm=line.match(/^(#{1,4})\s+(.+)$/); if(hm){ flushPara(); flushList(); const level=hm[1].length; const txt=hm[2].trim(); const id='h-'+(++hc)+'-'+slugify(txt); blocks.push({type:'h'+level,html:inlineMarkdown(txt),raw:txt,anchorId:id}); if(level<=3) state.toc.push({id, level, text:txt, pageIndex:0}); if(level===1 && !title) title=txt; continue; }
+        const qm=line.match(/^>\s?(.*)$/); if(qm){ flushPara(); flushList(); blocks.push({type:'blockquote',html:inlineMarkdown(qm[1]),anchorId:'q-'+blocks.length}); continue; }
+        const om=line.match(/^(\d+)\.\s+(.+)$/); const um=line.match(/^[-*+]\s+(.+)$/); if(om||um){ flushPara(); const type=om?'ol':'ul'; const item=inlineMarkdown((om||um)[2]); if(!list || list.type!==type){ flushList(); list={type,items:[]}; } list.items.push(item); continue; }
+        flushList(); para.push(line);
+      }
+      flushPara(); flushList(); state.bookTitle = els.titleInput.value.trim() || title || 'Untitled Volume'; state.author = els.authorInput.value.trim() || 'Unknown Author'; return blocks;
+    }
+    function blockToHtml(b){ const attr = b.anchorId ? ` data-anchor-id="${b.anchorId}"` : ''; if(b.type==='h1') return `<h1${attr}>${b.html}</h1>`; if(b.type==='h2') return `<h2${attr}>${b.html}</h2>`; if(b.type==='h3') return `<h3${attr}>${b.html}</h3>`; if(b.type==='h4') return `<h4${attr}>${b.html}</h4>`; if(b.type==='blockquote') return `<blockquote${attr}>${b.html}</blockquote>`; if(b.type==='hr') return `<hr${attr}>`; if(b.type==='ul') return `<ul${attr}>${b.items.map(i=>`<li>${i}</li>`).join('')}</ul>`; if(b.type==='ol') return `<ol${attr}>${b.items.map(i=>`<li>${i}</li>`).join('')}</ol>`; return `<p${attr} class="${b.dropcap?'dropcap':''}">${b.html||''}</p>`; }
+    function renderMeasure(blocks){ els.measureInner.innerHTML = blocks.map(blockToHtml).join(''); return els.measureInner.scrollHeight; }
+    function availableHeight(){ const cs=getComputedStyle(document.documentElement); return (parseFloat(cs.getPropertyValue('--page-height'))||640) - (parseFloat(cs.getPropertyValue('--header-space'))||44) - (parseFloat(cs.getPropertyValue('--footer-space'))||54); }
+    function splitHtmlWords(html){ return html.replace(/<[^>]+>/g,m=>` ${m} `).replace(/\s+/g,' ').trim().split(' ').filter(Boolean); }
+    function rebuildHtml(tokens){ let out=''; for(const t of tokens){ out += (t.startsWith('<') ? t : ((out && !out.endsWith('>')) ? ' ' : '') + t); } return out; }
+    function splitParagraph(block,current,maxH){ const tokens=splitHtmlWords(block.html||''); if(!tokens.length) return [block,null]; let low=1, high=tokens.length, best=0; while(low<=high){ const mid=(low+high)>>1; const test={...block,html:rebuildHtml(tokens.slice(0,mid))}; if(renderMeasure([...current,test])<=maxH){best=mid;low=mid+1;} else high=mid-1; } if(best<=0) best=Math.min(tokens.length,8); const first={...block,html:rebuildHtml(tokens.slice(0,best))}; const rest=tokens.slice(best); return [first,rest.length?{...block,html:rebuildHtml(rest),dropcap:false}:null]; }
+    function splitList(block,current,maxH){ let fit=[],rest=[]; for(let i=0;i<block.items.length;i++){ const test={...block,items:[...fit,block.items[i]]}; if(renderMeasure([...current,test])<=maxH) fit.push(block.items[i]); else {rest=block.items.slice(i); break;} } if(!fit.length){ fit=[block.items[0]]; rest=block.items.slice(1); } return [{...block,items:fit}, rest.length?{...block,items:rest}:null]; }
+    function paginate(blocks){ const maxH=availableHeight(); const queue=blocks.map(b=>({...b})); const pages=[]; let page=[]; let guard=0; while(queue.length && guard<30000){ guard++; const block=queue.shift(); const candidate=[...page,block]; if(renderMeasure(candidate)<=maxH){ page.push(block); continue; } if(!page.length){ if(block.type==='p' || block.type==='blockquote'){ const [fit,rest]=splitParagraph(block,[],maxH); page.push(fit); if(rest) queue.unshift(rest); } else if(block.type==='ul' || block.type==='ol'){ const [fit,rest]=splitList(block,[],maxH); page.push(fit); if(rest) queue.unshift(rest); } else page.push(block); pages.push(page); page=[]; continue; } if(block.type==='p' || block.type==='blockquote'){ const [fit,rest]=splitParagraph(block,page,maxH); if(fit) page.push(fit); pages.push(page); page=[]; if(rest) queue.unshift(rest); } else if(block.type==='ul' || block.type==='ol'){ const [fit,rest]=splitList(block,page,maxH); if(fit) page.push(fit); pages.push(page); page=[]; if(rest) queue.unshift(rest); } else { pages.push(page); page=[]; queue.unshift(block); } } if(page.length) pages.push(page); return pages; }
+    function pageHtml(blocks){ return (blocks||[]).map(blockToHtml).join(''); }
+    function renderPage(target, blocks){ target.innerHTML = pageHtml(blocks); }
+    function rebuildTOCMap(){ const map=new Map(); state.pages.forEach((page,pageIndex)=>{ page.forEach(block=>{ if(/^h[1-3]$/.test(block.type) && !map.has(block.anchorId)) map.set(block.anchorId,pageIndex); }); }); state.toc = state.toc.map(entry=>({...entry,pageIndex:map.get(entry.id) ?? 0})); }
+    function renderTOC(){ els.tocList.innerHTML=''; els.tocMeta.textContent=`${state.toc.length} entries`; state.toc.forEach(entry=>{ const btn=document.createElement('button'); btn.className='toc-item'; btn.style.paddingLeft=(12 + (entry.level-1)*12)+'px'; btn.innerHTML=`<strong>${entry.text}</strong><span>Page ${entry.pageIndex+1}</span>`; btn.addEventListener('click',()=>jumpToAnchor(entry.id)); els.tocList.appendChild(btn); }); }
+    function nearestAnchorForSpread(spread){ const pageIndex=spread*2; const page=state.pages[pageIndex]||[]; const block=page.find(b=>b.anchorId); return block?block.anchorId:null; }
+    function spreadForAnchor(anchorId){ if(!anchorId) return 0; for(let i=0;i<state.pages.length;i++) if((state.pages[i]||[]).some(b=>b.anchorId===anchorId)) return Math.floor(i/2); return 0; }
+    function currentChapterForSpread(spread){ const pageIndex=spread*2; let latest='No chapter'; for(let i=0;i<=pageIndex;i++) for(const b of state.pages[i]||[]) if(b.type==='h1'||b.type==='h2') latest=b.raw||latest; return latest; }
+    function updateMeta(){ const words = state.rawText.trim()?state.rawText.trim().split(/\s+/).length:0; els.wordCountChip.textContent=`${words} words`; const chapters=state.blocks.filter(b=>b.type==='h1'||b.type==='h2').length; els.chapterCountChip.textContent=`${chapters} chapters`; els.readingTimeChip.textContent=`${Math.max(1,Math.round(words/220))} min read`; }
+    function updateStatus(){ const total=state.pages.length; const spreads=Math.max(1,Math.ceil(total/2)); const left=state.currentSpread*2; const leftNo=left+1; const rightNo=left+2; const chapter=currentChapterForSpread(state.currentSpread); els.leftPageNumber.textContent=total?leftNo:'–'; els.rightPageNumber.textContent=total&&left+1<total?rightNo:'–'; els.leftFooterProgress.textContent=total?Math.round(leftNo/total*100)+'%':'0%'; els.rightFooterProgress.textContent=total&&left+1<total?Math.round(rightNo/total*100)+'%':'0%'; els.leftHeaderTitle.textContent=state.bookTitle; els.rightHeaderTitle.textContent=state.bookTitle; els.leftHeaderChapter.textContent=chapter; els.rightHeaderChapter.textContent=chapter; els.statusTitle.textContent=state.bookTitle||'No book loaded'; els.statusSpread.textContent=`Spread ${total?state.currentSpread+1:0} / ${total?spreads:0}`; els.statusPages.textContent=`Pages ${total?leftNo:0}${total&&left+1<total?`–${rightNo}`:''} / ${total}`; els.statusChapter.textContent=chapter; const atStart=state.currentSpread<=0; const atEnd=state.currentSpread>=spreads-1; [els.prevBtn,els.edgePrevBtn].forEach(b=>b.disabled=atStart||state.isAnimating||!total); [els.nextBtn,els.edgeNextBtn].forEach(b=>b.disabled=atEnd||state.isAnimating||!total); }
+    function renderSpread(){ if(!state.pages.length){ els.emptyState.classList.remove('hide'); els.book.classList.add('hide'); updateStatus(); return; } const left=state.currentSpread*2; renderPage(els.leftPageInner,state.pages[left]||[]); renderPage(els.rightPageInner,state.pages[left+1]||[]); els.emptyState.classList.add('hide'); els.book.classList.remove('hide'); updateStatus(); }
+    
+    
+    function goToSpread(target,dir){
+      const totalSpreads=Math.ceil(state.pages.length/2);
+      if(!state.pages.length||state.isAnimating) return;
+
+      target=Math.max(0,Math.min(target,totalSpreads-1));
+
+      if(target===state.currentSpread) return;
+
+      const direction=dir||(target>state.currentSpread?'forward':'backward');
+
+      state.isAnimating=true;
+      updateStatus();
+
+      const outClass = direction==='forward'
+        ? 'spread-forward-out'
+        : 'spread-backward-out';
+
+      const inClass = direction==='forward'
+        ? 'spread-forward-in'
+        : 'spread-backward-in';
+
+      els.book.classList.add('spread-animating', outClass);
+
+      setTimeout(()=>{
+        els.book.classList.remove(outClass);
+
+        state.currentSpread=target;
+        state.currentAnchorId=nearestAnchorForSpread(target);
+
+        renderSpread();
+
+        els.book.classList.add(inClass);
+
+        setTimeout(()=>{
+          els.book.classList.remove(
+            'spread-animating',
+            inClass
+          );
+
+          state.isAnimating=false;
+          updateStatus();
+        },170);
+
+      },120);
+    }
+
+
+    function jumpToAnchor(anchorId){ state.currentAnchorId=anchorId; state.currentSpread=spreadForAnchor(anchorId); renderSpread(); }
+    function loadBook(text,reset=true){ state.rawText=(text||'').trim(); if(!state.rawText){ state.blocks=[]; state.pages=[]; state.toc=[]; renderTOC(); updateMeta(); renderSpread(); return; } state.blocks=parseSource(state.rawText); state.pages=paginate(state.blocks); rebuildTOCMap(); renderTOC(); updateMeta(); state.currentSpread=reset?0:spreadForAnchor(state.currentAnchorId||nearestAnchorForSpread(state.currentSpread)); renderSpread(); }
+    function repaginate(){ if(!state.rawText.trim()){ state.pages=[]; renderSpread(); return; } state.currentAnchorId=nearestAnchorForSpread(state.currentSpread); state.blocks=parseSource(state.rawText); state.pages=paginate(state.blocks); rebuildTOCMap(); renderTOC(); state.currentSpread=spreadForAnchor(state.currentAnchorId||state.toc[0]?.id||null); renderSpread(); updateMeta(); }
+    function applyFontPreset(v){ const root=document.documentElement; const labels={garamond:'EB Garamond',cormorant:'Cormorant',classic:'Georgia',modern:'Inter'}; if(v==='garamond'){ root.style.setProperty('--font-body', `'EB Garamond', Georgia, serif`); root.style.setProperty('--font-head', `'Cormorant Garamond', Georgia, serif`); } else if(v==='cormorant'){ root.style.setProperty('--font-body', `'Cormorant Garamond', Georgia, serif`); root.style.setProperty('--font-head', `'Cormorant Garamond', Georgia, serif`); } else if(v==='classic'){ root.style.setProperty('--font-body', `Georgia, 'Times New Roman', serif`); root.style.setProperty('--font-head', `'Cormorant Garamond', Georgia, serif`); } else { root.style.setProperty('--font-body', `'Inter', system-ui, sans-serif`); root.style.setProperty('--font-head', `'Cormorant Garamond', Georgia, serif`); } els.fontValue.textContent=labels[v]; }
+    function updateRanges(){ ranges.forEach(r=>{ r.value.textContent=r.input.value+r.unit; document.documentElement.style.setProperty(r.cssVar,r.input.value+r.unit); }); }
+    async function enterFullscreen(){ try{ if(!document.fullscreenElement) await document.documentElement.requestFullscreen(); }catch(e){} }
+    async function exitFullscreen(){ try{ if(document.fullscreenElement) await document.exitFullscreen(); }catch(e){} }
+    function syncFullscreen(){ const fs=!!document.fullscreenElement; els.readerShell.classList.toggle('fullscreen',fs); els.body.classList.toggle('fs-reading',fs); els.app.classList.toggle('left-collapsed',fs); els.app.classList.toggle('right-collapsed',fs); if(fs){ els.readerShell.classList.add('reveal-ui'); } else { els.readerShell.classList.remove('reveal-ui'); } els.fullscreenBtn.textContent=fs?'Exit Fullscreen':'Fullscreen'; }
+    let revealTimer=null; function revealUI(){ if(!document.fullscreenElement) return; els.readerShell.classList.add('reveal-ui'); clearTimeout(revealTimer); revealTimer=setTimeout(()=>els.readerShell.classList.remove('reveal-ui'),2200); }
+    function runSearch(){ const q=els.searchInput.value.trim().toLowerCase(); if(!q){ els.searchResultText.textContent='No search active.'; return; } const hit=state.blocks.find(b=>(b.raw||b.html||'').toLowerCase().includes(q)); if(!hit){ els.searchResultText.textContent='No results found.'; return; } els.searchResultText.textContent=`Found in ${hit.type.toUpperCase()} block.`; jumpToAnchor(hit.anchorId); }
+    function addBookmark(){ const anchor=nearestAnchorForSpread(state.currentSpread); if(!anchor) return; const exists=state.bookmarks.find(b=>b.anchorId===anchor); if(exists) return; state.bookmarks.push({anchorId:anchor,spread:state.currentSpread,chapter:currentChapterForSpread(state.currentSpread)}); els.searchResultText.textContent=`Bookmark added at ${currentChapterForSpread(state.currentSpread)}.`; }
+    function bind(){
+      els.openBookBtn.addEventListener('click',()=>loadBook(els.bookInput.value,true)); els.sampleBtn.addEventListener('click',()=>{ els.bookInput.value=sampleMarkdown; loadBook(sampleMarkdown,true); }); els.clearBtn.addEventListener('click',()=>{ els.bookInput.value=''; state.rawText=''; state.blocks=[]; state.pages=[]; state.toc=[]; renderTOC(); updateMeta(); renderSpread(); });
+      els.hideLeftBtn.addEventListener('click',()=>els.app.classList.add('left-collapsed')); els.hideRightBtn.addEventListener('click',()=>els.app.classList.add('right-collapsed')); els.showLeftBtn.addEventListener('click',()=>els.app.classList.toggle('left-collapsed')); els.showRightBtn.addEventListener('click',()=>els.app.classList.toggle('right-collapsed'));
+      els.prevBtn.addEventListener('click',()=>goToSpread(state.currentSpread-1,'backward')); els.nextBtn.addEventListener('click',()=>goToSpread(state.currentSpread+1,'forward')); els.edgePrevBtn.addEventListener('click',()=>goToSpread(state.currentSpread-1,'backward')); els.edgeNextBtn.addEventListener('click',()=>goToSpread(state.currentSpread+1,'forward'));
+      els.fullscreenBtn.addEventListener('click',()=>document.fullscreenElement?exitFullscreen():enterFullscreen()); els.repaginateBtn.addEventListener('click',repaginate); els.bookmarkBtn.addEventListener('click',addBookmark); els.goToStartBtn.addEventListener('click',()=>{ state.currentSpread=0; renderSpread(); });
+      els.searchBtn.addEventListener('click',runSearch); els.clearSearchBtn.addEventListener('click',()=>{ els.searchInput.value=''; els.searchResultText.textContent='No search active.'; });
+      els.themeSelect.addEventListener('change',e=>{ document.body.setAttribute('data-page-theme',e.target.value); els.themeValue.textContent=e.target.options[e.target.selectedIndex].textContent; });
+      els.fontSelect.addEventListener('change',e=>{ applyFontPreset(e.target.value); repaginate(); }); els.speedSelect.addEventListener('change',e=>{ els.speedValue.textContent='Swift'; });
+      let timer=null; ranges.forEach(r=>r.input.addEventListener('input',()=>{ updateRanges(); clearTimeout(timer); timer=setTimeout(repaginate,50); })); window.addEventListener('resize',()=>{ clearTimeout(timer); timer=setTimeout(repaginate,120); });
+      document.addEventListener('fullscreenchange',syncFullscreen); document.addEventListener('mousemove',e=>{ if(document.fullscreenElement && e.clientY<72) revealUI(); }); els.revealZone.addEventListener('mouseenter',revealUI);
+      document.addEventListener('keydown',e=>{ if(e.key==='ArrowRight'){e.preventDefault();goToSpread(state.currentSpread+1,'forward');} if(e.key==='ArrowLeft'){e.preventDefault();goToSpread(state.currentSpread-1,'backward');} if(e.key.toLowerCase()==='f'){e.preventDefault();document.fullscreenElement?exitFullscreen():enterFullscreen();} if(e.key==='Escape'&&document.fullscreenElement){ exitFullscreen(); } });
+    }
+    function init(){ updateRanges(); applyFontPreset('garamond'); els.themeValue.textContent='Old Book'; els.speedValue.textContent='Balanced'; bind(); els.bookInput.value=sampleMarkdown; loadBook(sampleMarkdown,true); }
+    init();
+  </script>
+</body>
+</html>
